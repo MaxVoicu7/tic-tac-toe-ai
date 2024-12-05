@@ -1,9 +1,19 @@
 import React, { useState, useEffect } from "react";
 import "./GameBoard.css";
 
-const GameBoard: React.FC = () => {
-  const [board, setBoard] = useState<Array<string | null>>(Array(9).fill(null));
-  const [isPlayerTurn, setIsPlayerTurn] = useState(true);
+interface GameBoardProps {
+  board: (string | null)[];
+  setBoard: React.Dispatch<React.SetStateAction<(string | null)[]>>;
+  isPlayerTurn: boolean;
+  setIsPlayerTurn: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const GameBoard: React.FC<GameBoardProps> = ({
+  board,
+  setBoard,
+  isPlayerTurn,
+  setIsPlayerTurn,
+}) => {
   const [winner, setWinner] = useState<string | null>(null);
   const [isDraw, setIsDraw] = useState(false);
 
@@ -30,50 +40,43 @@ const GameBoard: React.FC = () => {
     return board.every((cell) => cell !== null) && !checkWinner(board);
   };
 
-  const getAvailableMoves = (board: Array<string | null>): number[] => {
-    return board.reduce((moves: number[], cell, index) => {
-      if (cell === null) moves.push(index);
-      return moves;
-    }, []);
-  };
-
   const minimax = (
     boardState: Array<string | null>,
     player: string
   ): number => {
-    const availableMoves = getAvailableMoves(boardState);
     const winner = checkWinner(boardState);
-
     if (winner === "X") return -10;
     if (winner === "O") return 10;
-    if (availableMoves.length === 0) return 0;
+    if (boardState.every((cell) => cell !== null)) return 0;
 
-    const moves = availableMoves.map((index) => {
-      const newBoard = [...boardState];
-      newBoard[index] = player;
-      const score = minimax(newBoard, player === "O" ? "X" : "O");
-      return { index, score };
-    });
+    const moves = boardState.reduce((acc: number[], cell, index) => {
+      if (cell === null) {
+        const newBoard = [...boardState];
+        newBoard[index] = player;
+        const score = minimax(newBoard, player === "O" ? "X" : "O");
+        acc.push(score);
+      }
+      return acc;
+    }, []);
 
-    return player === "O"
-      ? Math.max(...moves.map((m) => m.score))
-      : Math.min(...moves.map((m) => m.score));
+    return player === "O" ? Math.max(...moves) : Math.min(...moves);
   };
 
   const findBestMove = (boardState: Array<string | null>): number => {
-    const availableMoves = getAvailableMoves(boardState);
     let bestScore = -Infinity;
     let bestMove = -1;
 
-    for (const move of availableMoves) {
-      const newBoard = [...boardState];
-      newBoard[move] = "O";
-      const score = minimax(newBoard, "X");
-      if (score > bestScore) {
-        bestScore = score;
-        bestMove = move;
+    boardState.forEach((cell, index) => {
+      if (cell === null) {
+        const newBoard = [...boardState];
+        newBoard[index] = "O";
+        const score = minimax(newBoard, "X");
+        if (score > bestScore) {
+          bestScore = score;
+          bestMove = index;
+        }
       }
-    }
+    });
 
     return bestMove;
   };
