@@ -1,0 +1,73 @@
+.board-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6rem;
+  height: 90vh;
+}
+
+.board-title {
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: #ff00ff;
+  text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 100px);
+  grid-template-rows: repeat(3, 100px);
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background: rgba(41, 41, 61, 0.3);
+  border-radius: 15px;
+  box-shadow: 0 0 30px rgba(123, 0, 255, 0.2);
+}
+
+.cell {
+  width: 100px;
+  height: 100px;
+  background-color: rgba(20, 20, 35, 0.8);
+  border: 2px solid #7b00ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px rgba(123, 0, 255, 0.3);
+  border-radius: 8px;
+}
+
+.cell:hover {
+  background-color: rgba(30, 30, 45, 0.9);
+  box-shadow: 0 0 20px rgba(123, 0, 255, 0.5),
+    inset 0 0 10px rgba(123, 0, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.x-cell {
+  color: #00ffff;
+  text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
+}
+
+.o-cell {
+  color: #ff9100;
+  text-shadow: 0 0 10px #ff9100, 0 0 20px #ff9100;
+}
+
+.winner {
+  margin-top: 2rem;
+  font-size: 2rem;
+  color: #00ff00;
+  text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
+  text-align: center;
+}

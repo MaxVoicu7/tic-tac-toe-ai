@@ -1,0 +1,25 @@
+.app-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #0a0f18;
+  color: #ff00ff;
+  padding: 2rem;
+  gap: 2rem;
+  width: 100%;
+}
+
+.game-board {
+  flex: 0 0 auto;
+  min-width: fit-content;
+  border: 2px solid #ff00ff;
+  border-radius: 8px;
+  box-shadow: 0 0 20px #ff00ff, inset 0 0 10px #ff00ff;
+}
+
+.game-tree {
+  flex: 1;
+  min-width: 1250px;
+  border: 2px solid #ff00ff;
+  border-radius: 8px;
+  box-shadow: 0 0 20px #ff00ff, inset 0 0 10px #ff00ff;
+}
