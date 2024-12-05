@@ -6,7 +6,14 @@ interface AIMove {
   board: (string | null)[];
   bestMove: number;
   bestScore: number;
-  evaluatedMoves: { index: number; score: number }[];
+  treeNodes: TreeNode[];
+}
+
+interface TreeNode {
+  position: number;
+  board: (string | null)[];
+  score: number;
+  children: TreeNode[];
 }
 
 interface GameTreeProps {
@@ -63,15 +70,44 @@ const GameTree: React.FC<GameTreeProps> = ({ board, currentPlayer }) => {
     }, []);
   };
 
+  const generateMoveTree = (
+    boardState: (string | null)[],
+    position: number
+  ): TreeNode => {
+    const newBoard = [...boardState];
+    newBoard[position] = "O";
+
+    // Get immediate responses from player
+    const playerMoves = getAvailableMoves(newBoard).map((pos) => {
+      const playerBoard = [...newBoard];
+      playerBoard[pos] = "X";
+      return {
+        position: pos,
+        board: playerBoard,
+        score: calculateScore(playerBoard),
+        children: [],
+      };
+    });
+
+    return {
+      position,
+      board: newBoard,
+      score: calculateScore(newBoard),
+      children: playerMoves,
+    };
+  };
+
   useEffect(() => {
     if (currentPlayer === "O") {
       const availableMoves = getAvailableMoves(board);
-      const evaluatedMoves = availableMoves.map((index) => {
-        const newBoard = [...board];
-        newBoard[index] = "O";
-        const score = calculateScore(newBoard);
-        return { index, score };
-      });
+      const treeNodes = availableMoves.map((pos) =>
+        generateMoveTree(board, pos)
+      );
+
+      const evaluatedMoves = treeNodes.map((node) => ({
+        index: node.position,
+        score: node.score,
+      }));
 
       const bestMove = evaluatedMoves.reduce((best, current) =>
         current.score > best.score ? current : best
@@ -82,40 +118,73 @@ const GameTree: React.FC<GameTreeProps> = ({ board, currentPlayer }) => {
         board: [...board],
         bestMove: bestMove.index,
         bestScore: bestMove.score,
-        evaluatedMoves,
+        treeNodes,
       };
 
       setAiMoveHistory((prev) => [...prev, newAiMove]);
     }
   }, [board, currentPlayer]);
 
+  const renderTreeNode = (node: TreeNode, isBestMove: boolean) => (
+    <div className={`tree-node ${isBestMove ? "best-move" : ""}`}>
+      <div className="node-header">
+        Position {node.position + 1}
+        <div className="node-score">Score: {node.score}</div>
+      </div>
+      <div className="mini-board">
+        {node.board.map((cell, idx) => (
+          <div
+            key={idx}
+            className={`mini-cell ${cell === "X" ? "x-cell" : ""} ${
+              cell === "O" ? "o-cell" : ""
+            }`}
+          >
+            {cell}
+          </div>
+        ))}
+      </div>
+      {node.children.length > 0 && (
+        <div className="possible-responses">
+          <div className="responses-label">Possible Player Responses:</div>
+          <div className="responses-grid">
+            {node.children.map((child, idx) => (
+              <div key={idx} className="response-node">
+                <div className="mini-board">
+                  {child.board.map((cell, cellIdx) => (
+                    <div
+                      key={cellIdx}
+                      className={`mini-cell ${cell === "X" ? "x-cell" : ""} ${
+                        cell === "O" ? "o-cell" : ""
+                      }`}
+                    >
+                      {cell}
+                    </div>
+                  ))}
+                </div>
+                <div className="node-score">Score: {child.score}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="game-tree">
-      <h2 className="tree-title">AI Move History</h2>
+      <h2 className="tree-title">AI Decision Tree Analysis</h2>
       <div className="ai-history">
         {aiMoveHistory.map((move, index) => (
           <div key={index} className="ai-move-container">
             <div className="move-header">
               <h3>AI Move #{move.moveNumber}</h3>
             </div>
-            <div className="best-move">
-              <h4>Selected Move: Position {move.bestMove + 1}</h4>
-              <div className="score">Score: {move.bestScore}</div>
-            </div>
-            <div className="evaluated-moves">
-              <h4>Evaluated Positions:</h4>
-              <div className="moves-grid">
-                {move.evaluatedMoves.map(({ index, score }) => (
-                  <div
-                    key={index}
-                    className={`move-evaluation ${
-                      index === move.bestMove ? "best-choice" : ""
-                    }`}
-                  >
-                    <div className="position">Position {index + 1}</div>
-                    <div className="score">Score: {score}</div>
-                  </div>
-                ))}
+            <div className="tree-visualization">
+              <h4>Decision Tree:</h4>
+              <div className="tree-nodes">
+                {move.treeNodes.map((node, idx) =>
+                  renderTreeNode(node, node.position === move.bestMove)
+                )}
               </div>
             </div>
           </div>
