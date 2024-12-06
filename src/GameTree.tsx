@@ -77,7 +77,6 @@ const GameTree: React.FC<GameTreeProps> = ({ board, currentPlayer }) => {
     const newBoard = [...boardState];
     newBoard[position] = "O";
 
-    // Get immediate responses from player
     const playerMoves = getAvailableMoves(newBoard).map((pos) => {
       const playerBoard = [...newBoard];
       playerBoard[pos] = "X";
@@ -182,7 +181,7 @@ const GameTree: React.FC<GameTreeProps> = ({ board, currentPlayer }) => {
             <div className="tree-visualization">
               <h4>Decision Tree:</h4>
               <div className="tree-nodes">
-                {move.treeNodes.map((node, idx) =>
+                {move.treeNodes.map((node) =>
                   renderTreeNode(node, node.position === move.bestMove)
                 )}
               </div>
